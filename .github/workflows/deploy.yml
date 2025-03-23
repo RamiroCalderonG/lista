@@ -1,0 +1,33 @@
+name: Deploy Code
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:    
+
+- name: Conectar a Tailscale
+  run: |
+    curl -fsSL https://tailscale.com/install.sh | sh
+    sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }}
+
+- name: Sincronizar código con servidor
+  run: |
+    ssh -o StrictHostKeyChecking=no ramiro@100.70.140.108 "
+    cd /home/ramiro/lista &&
+    git pull origin main &&
+    pm2 restart lista"
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Update Code on Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ramiro@100.70.140.108 "
+          cd /home/ramiro/lista &&
+          git pull origin main &&
+          pm2 restart lista"
